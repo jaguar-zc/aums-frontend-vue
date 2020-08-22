@@ -1,29 +1,20 @@
-import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { login, logout, currentUserInfo, getResourceMenu } from '@/api/apis'
+import { setToken, removeToken, setMenu } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
-    token: getToken(),
-    name: '',
-    avatar: ''
+    userInfo: {}
   }
+
 }
+
 
 const state = getDefaultState()
 
 const mutations = {
-  RESET_STATE: (state) => {
-    Object.assign(state, getDefaultState())
-  },
-  SET_TOKEN: (state, token) => {
-    state.token = token
-  },
-  SET_NAME: (state, name) => {
-    state.name = name
-  },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar
+  SET_USERINFO: (state, userInfo) => {
+    state.userInfo = userInfo
   }
 }
 
@@ -35,7 +26,7 @@ const actions = {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
         console.log(data)
-        commit('SET_TOKEN', data.token)
+
         setToken(data.token)
         resolve()
       }).catch(error => {
@@ -45,19 +36,26 @@ const actions = {
   },
 
   // get user info
-  getInfo({ commit, state }) {
+  getInfo({ commit }) {
     return new Promise((resolve, reject) => {
-      getInfo().then(response => {
+      currentUserInfo().then(response => {
         const { data } = response
 
         if (!data) {
-          return reject('Verification failed, please Login again.')
+          return reject('登录中发生错误, 请重试.')
         }
-
-        // const { name, icon } = data
-
-        // commit('SET_NAME', name)
-        // commit('SET_AVATAR', icon)
+        commit('SET_USERINFO', data)
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+  getUserMenu({ commit }) {
+    return new Promise((resolve, reject) => {
+      getResourceMenu({menuType:'ME'}).then(response => {
+        const { data } = response 
+        setMenu(data)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -66,12 +64,12 @@ const actions = {
   },
 
   // user logout
-  logout({ commit, state }) {
+  logout({ state }) {
+    console.log("logout")
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
         removeToken() // must remove  token  first
-        resetRouter()
-        commit('RESET_STATE')
+        resetRouter() 
         resolve()
       }).catch(error => {
         reject(error)
@@ -80,10 +78,9 @@ const actions = {
   },
 
   // remove token
-  resetToken({ commit }) {
+  resetToken() {
     return new Promise(resolve => {
       removeToken() // must remove  token  first
-      commit('RESET_STATE')
       resolve()
     })
   }

@@ -115,3 +115,28 @@ export function param2Obj(url) {
   })
   return obj
 }
+
+export function parseQuery(str) {
+  const obj = {};
+  str
+    .replace(/^\?/, '')
+    .split('&')
+    .forEach((item) => {
+      if (!item) return;
+      const [key, value] = item.split('=');
+      obj[decodeURIComponent(key)] = decodeURIComponent(value);
+    });
+  return obj;
+}
+
+export function stringifyQuery(obj) {
+  let str = '';
+  Object.keys(obj).forEach((key) => {
+    str = `${str}&${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`;
+  });
+  if (str) {
+    str = str.replace(/^&/, '?');
+  }
+
+  return str;
+}
