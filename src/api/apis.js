@@ -5,7 +5,7 @@ export function login(data) {
 }
 
 export function logout() {
-  return post('/logout')
+  return get('/logout')
 }
 
 //用户接口
@@ -77,3 +77,22 @@ export function deleteResource( id) {
 export function getResourceMenu( data) {
   return get('/system/resource/menu',data)
 } 
+
+//资源接口 GET /api/v1/system/dict
+export function listDict( data) {
+  return get('/system/dict',data)
+}
+export function addDict( data) {
+  return post('/system/dict',data)
+}
+export function updateDict( data) {
+  return put('/system/dict',data)
+}
+export function deleteDict( id) {
+  return del('/system/dict/'+id)
+} 
+
+//日志接口 GET /api/v1/system/logs
+export function listLogs(data) {
+  return get('/system/logs',data)
+}

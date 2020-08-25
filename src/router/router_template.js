@@ -1,65 +1,10 @@
 /* Layout */
 import Layout from '@/layout'
 
-import {getMenu} from '@/utils/auth'
-
-const m = [
-    {
-        "id": "1",
-        "key": "HOME",
-        "title": "工作台",
-        "icon": "dashboard",
-        "children": []
-    },
-    {
-        "id": "2",
-        "key": "SYS",
-        "title": "系统设置",
-        "icon": "el-icon-s-help",
-        "children": [
-            {
-                "id": "3",
-                "key": "SYS_USER",
-                "title": "用户管理",
-                "icon": "table",
-                "children": null
-            },
-            {
-                "id": "5",
-                "key": "SYS_ROLE",
-                "title": "角色管理",
-                "icon": "form",
-                "children": null
-            },
-            {
-                "id": "4",
-                "key": "SYS_DEPT",
-                "title": "部门管理",
-                "icon": "table",
-                "children": null
-            },
-            {
-                "id": "7",
-                "key": "SYS_DICT",
-                "title": "字典管理",
-                "icon": "tree",
-                "children": null
-            },
-            {
-                "id": "6",
-                "key": "SYS_RESOURCE",
-                "title": "资源管理",
-                "icon": "tree",
-                "children": null
-            }
-        ]
-    }
-]
+import { getKeys } from '@/utils/auth'
 
 
-
-
-export const defaultMenuList = [ 
+export const defaultMenuList = [
   {
     path: '/',
     component: Layout,
@@ -69,80 +14,111 @@ export const defaultMenuList = [
       path: 'dashboard',
       name: 'HOME',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '工作台', icon: 'dashboard' }
+      meta: { title: '工作台', icon: 'dashboard', affix: true }
     }]
   },
-  
+
   {
     path: '/setting',
     component: Layout,
     redirect: '/setting/user',
     name: 'SYS',
-    meta: { title: '系统设置', icon: 'el-icon-setting' },
+    meta: { title: '系统设置', icon: 'el-icon-setting', affix: true  },
     children: [
       {
         path: 'user',
         name: 'SYS_USER',
         component: () => import('@/views/setting/user/index'),
-        meta: { title: '用户管理', icon: 'table' }
+        meta: { title: '用户管理', icon: 'table', affix: true  }
       },
       {
         path: 'role',
         name: 'SYS_ROLE',
-        component: () => import('@/views/setting/user/index'),
-        meta: { title: '角色管理', icon: 'tree' }
+        component: () => import('@/views/setting/role/index'),
+        meta: { title: '角色管理', icon: 'tree', affix: true  }
       },
       {
         path: 'dept',
         name: 'SYS_DEPT',
-        component: () => import('@/views/setting/user/index'),
-        meta: { title: '部门管理', icon: 'tree' }
+        component: () => import('@/views/setting/dept/index'),
+        meta: { title: '部门管理', icon: 'tree', affix: true  }
       },
       {
         path: 'dict',
         name: 'SYS_DICT',
-        component: () => import('@/views/setting/user/index'),
-        meta: { title: '字典管理', icon: 'tree' }
+        component: () => import('@/views/setting/dict/index'),
+        meta: { title: '字典管理', icon: 'tree' , affix: true }
       },
       {
         path: 'resource',
         name: 'SYS_RESOURCE',
-        component: () => import('@/views/setting/user/index'),
-        meta: { title: '资源管理', icon: 'tree' }
+        component: () => import('@/views/setting/resource/index'),
+        meta: { title: '资源管理', icon: 'tree', affix: true  }
+      } 
+    ]
+  },
+  {
+    path: '/ops',
+    component: Layout,
+    redirect: '/ops/logs',
+    name: 'OPS',
+    meta: { title: '运维工具', icon: 'el-icon-setting', affix: true },
+    children: [
+      {
+        path: 'logs',
+        name: 'OPS_LOGS',
+        component: () => import('@/views/ops/logs/index'),
+        meta: { title: '日志管理', icon: 'tree' , affix: true }
+      },
+      {
+        path: 'monitor',
+        name: 'OPS_MONITOR',
+        component: () => import('@/views/ops/logs/index'),
+        meta: { title: 'JVM监控', icon: 'tree' , affix: true }
       }
     ]
-  }]
+  }
 
-  export function meunList(){
-      let m = new Array() 
-      let userMenu = JSON.parse(getMenu()) 
-      for (let i in defaultMenuList){
-        let menu = defaultMenuList[i]
-        if(menu.children.length <= 1){//单菜单判断了权限直接加入进去
-          if(f(menu.name,userMenu)){
-            m.push(menu)
-          }
-        }else{// 有多个子菜单的 需要判断子菜单
-          if(f(menu.name,userMenu)){//先判断有无主菜单权限
-            let childrenTrem = menu;
-            childrenTrem.children = [];
-            for (let j in  menu.children){
-              let jmenu = menu.children[j]
-              if(f(jmenu.name,userMenu)){
-                childrenTrem.push(jmenu)
-              }
-            }
-            m.push(childrenTrem)
+]
+
+export function getUserMenuList() {
+  let ownMenu = new Array()
+  let keys = getKeys()
+
+  for (let i in defaultMenuList) {
+    const menu = defaultMenuList[i]
+    if (keys.indexOf(menu.name) != -1) {//先判断有无主菜单权限 
+      if (menu.children.length <= 1) {//单菜单判断了权限直接加入进去
+        let item =  createMeunItem(menu, 1)
+        item.children.push(createMeunItem(menu.children[0], 2))
+        ownMenu.push(item) 
+      } else {// 有多个子菜单的 需要判断子菜单 
+        var itemChildren = createMeunItem(menu, 1);
+        for (let j in menu.children) {
+          let jmenu = menu.children[j]
+          if (keys.indexOf(jmenu.name) != -1) {//判断有无子菜单权限
+            itemChildren.children.push(createMeunItem(jmenu, 2))
           }
         }
-      }  
-      return m;
-  } 
-  function f(name,userMenu){
-    for(var i in userMenu) {
-      if(userMenu[i].key === name){
-          return true;
+        ownMenu.push(itemChildren)
       }
-    } 
-    return false; 
+    }
   }
+  return ownMenu;
+}
+
+
+function createMeunItem(source, level) {
+  let menu = {}
+  menu['path'] = source.path;
+  menu['name'] = source.name;
+  menu['component'] = source.component;
+  if (source.meta != null) {
+    menu['meta'] = source.meta;
+  }
+  if (level == 1) {
+    menu['redirect'] = source.redirect;
+    menu['children'] = new Array();
+  }
+  return menu;
+}

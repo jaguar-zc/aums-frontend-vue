@@ -1,5 +1,5 @@
 import { login, logout, currentUserInfo, getResourceMenu } from '@/api/apis'
-import { setToken, removeToken, setMenu } from '@/utils/auth'
+import { setToken, removeToken, setKeys } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
@@ -40,7 +40,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       currentUserInfo().then(response => {
         const { data } = response
-
         if (!data) {
           return reject('登录中发生错误, 请重试.')
         }
@@ -55,8 +54,16 @@ const actions = {
     return new Promise((resolve, reject) => {
       getResourceMenu({menuType:'ME'}).then(response => {
         const { data } = response 
-        setMenu(data)
-        resolve(data)
+        let keys = [];
+        for(let i in data){
+          keys.push(data[i].key)
+          let itemChildren = data[i].children
+          for(let j in itemChildren){
+            keys.push(itemChildren[j].key)
+          } 
+        }
+        setKeys(keys)
+        resolve(keys)
       }).catch(error => {
         reject(error)
       })

@@ -1,7 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :inline="true" :model="queryform" class="demo-form-inline">
-
       <el-form-item label="">
          <el-button  size="small"  @click="handleShowAddClick"  icon="el-icon-plus">添加</el-button>
       </el-form-item>
@@ -24,22 +23,24 @@
     >
       <el-table-column align="center" label="ID" width="35">
         <template slot-scope="scope">
-          {{ ((page-1) * size) + (scope.$index + 1) }}
+        {{ ((page-1) * size) + (scope.$index + 1) }}
         </template>
       </el-table-column>
-      <el-table-column width="110" label="名称">
+      <el-table-column label="部门名称" width="110">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
-      <el-table-column width="110" label="编码">
-        <template slot-scope="scope">{{ scope.row.code }}</template>
-      </el-table-column>
-
-      <el-table-column label="描述" align="center">
+      <el-table-column label="描述">
         <template slot-scope="scope">{{ scope.row.remark }}</template>
+      </el-table-column>
+      <el-table-column label="创建人" width="110">
+        <template slot-scope="scope">{{ scope.row.createUser }}</template>
+      </el-table-column>
+      <el-table-column label="创建时间" width="150">
+        <template slot-scope="scope">{{ scope.row.createTime }}</template>
       </el-table-column>
       <el-table-column align="center" prop="created_at" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button @click="handleEditClick(scope.row)" type="text" size="small">编辑</el-button>
+          <el-button @click="handleShowEditClick(scope.row)" type="text" size="small">编辑</el-button>
           <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -59,28 +60,13 @@
       ></el-pagination>
     </div>
 
-
-
-    <el-dialog :title="dialogFormTitle" width="50%" :visible.sync="dialogFormVisible">
+     <el-dialog :title="dialogFormTitle" width="25%" :visible.sync="dialogFormVisible">
       <el-form :model="form">
-        <el-form-item label="角色名称" :label-width="formLabelWidth">
+        <el-form-item label="部门名称" :label-width="formLabelWidth">
           <el-input  v-model="form.name" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="角色编码" :label-width="formLabelWidth">
-          <el-input  v-model="form.code" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="描述" :label-width="formLabelWidth">
           <el-input  type="textarea"  v-model="form.remark" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="资源" :label-width="formLabelWidth">
-
-          <div v-for="rootItem in rootResource" :key="rootItem.id" >
-            <el-checkbox-group v-model="checkedCities" @change="handleCheckedCitiesChange">  
-              <el-checkbox :checked="rootItem.checked"  @change="handleCheckAllChange">{{rootItem.name}}</el-checkbox>
-              <el-checkbox v-for="item in rootItem.children" :label="item.name" :checked="item.checked" :key="item.id">{{item.name}}</el-checkbox>
-            </el-checkbox-group>
-          </div>
-        
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -88,14 +74,15 @@
         <el-button type="primary" @click="handleEditSubmit">确 定</el-button>
       </div>
     </el-dialog>
-
-
   </div>
 </template>
 
+
+
+
 <script>
-import { listRole,addRole,updateRole,deleteRole,getResourceMenu } from "@/api/apis";
-import { getKeys } from '@/utils/auth'
+import { listDept,addDept,updateDept,deleteDept } from "@/api/apis";
+
 export default {
   filters: {
     statusFilter(status) {
@@ -110,17 +97,17 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
-      dialogFormTitle:"角色编辑",
-      formLabelWidth:"80px",
+      dialogFormTitle: "部门编辑",
+      formLabelWidth: "120px",
       form: {
-        // "id":"3",
-        // "name":"部门经理",
-        // "code":"dept_LOADER",
-        // "remark":"部门经理的角色",
-        // "resourceList":[]
+      // "id":"5",
+      // "name":"UED部门",
+      // "remark":"UED部。。",
+      // "createTime":"2020-08-24 11:14:18",
+      // "createUser":"admin"
       },
       page: 1,
-      size: 5,
+      size: 10,
       total: 10,
       rows: [],
       listLoading: true,
@@ -128,48 +115,16 @@ export default {
         name: "",
         status: "",
       },
-      isIndeterminate:true,
-      checkedCities:[],
-      rootResource:[]
     };
   },
   created() {
     this.handleCurrentChange(1);
-      let keys = getKeys()
-      getResourceMenu({menuType:'ALL'}).then((response)=>{
-        const {data} = response
-        for(let i in data){
-          let key = data[i].key;
-          let item = { 
-            id:data[i].id, 
-            name:data[i].title,
-            checked:keys.indexOf(key)!=-1,
-            children: [] 
-          }
-          let itemChildren = data[i].children
-          if(itemChildren == null || itemChildren == undefined){
-            itemChildren = []
-          }
-          for(let j in itemChildren){
-              item.children.push({
-                 id:itemChildren[j].id, 
-                 name:itemChildren[j].title,
-                 checked:keys.indexOf(itemChildren[j].key)!=-1,
-                 children:[] 
-                 })
-          }
-          this.rootResource.push(item)
-        }
-        console.log("=============")
-        console.log(this.rootResource)
-        console.log("=============")
-    })
   },
   methods: {
     handleCurrentChange(p) {
       console.log(`当前页: ${p}`);
       this.listLoading = true;
-      listRole({ page: p, size: this.size }).then((response) => {
+      listDept({ page: p, size: this.size }).then((response) => {
         this.rows = response.data.rows;
         this.page = p;
         this.total = response.data.total;
@@ -184,37 +139,31 @@ export default {
     onSearch() {
       this.handleCurrentChange(this.page);
     },
-    handleEditClick(row) {
+    handleShowEditClick(row) {
+      console.log(row);
       this.form = row;
-
-      let resourceList = this.form.resourceList 
-
       this.dialogFormVisible = !this.dialogFormVisible;
     },
     handleShowAddClick(){
       this.dialogFormVisible = true;
       this.form = {
         "id":null,
-        "name":"",
-        "code":"",
-        "remark":"",
-        "resourceList":[]
+        "name":"", 
+        "remark":""
       }
     },
     handleDeleteClick(row) {
-       this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
-        }) ;
-      // this.form = row;
-      // this.dialogFormVisible = !this.dialogFormVisible;
+       this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'})
+       .then(() => {
+          deleteDept(row.id).then(()=>{
+            this.$message({ type: 'success', message: '删除成功!' });
+            this.onSearch()
+          })
+        })
     },
     handleEditSubmit() { 
       if(this.form.id == null ){
-        addRole(this.form).then(()=>{
+        addDept(this.form).then(()=>{
             this.dialogFormVisible = false
             this.$message({
               type: 'success',
@@ -223,7 +172,7 @@ export default {
             this.onSearch()
         })
       }else{
-        updateRole(this.form).then(()=>{
+        updateDept(this.form).then(()=>{
             this.dialogFormVisible = false
             this.$message({
               type: 'success',
@@ -231,11 +180,7 @@ export default {
             });
         })
       }
-      
-     
-    },
-    handleCheckAllChange(){},
-     handleCheckedCitiesChange(){},
-  },
+    }
+  }
 };
 </script>
