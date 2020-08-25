@@ -78,6 +78,10 @@ export function getResourceMenu( data) {
   return get('/system/resource/menu',data)
 } 
 
+export function getResourceListByRoleId( id) {
+  return get('/system/resource/role/'+id,{})
+} 
+
 //资源接口 GET /api/v1/system/dict
 export function listDict( data) {
   return get('/system/dict',data)

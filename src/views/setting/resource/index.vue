@@ -4,11 +4,27 @@
       <el-form-item label>
         <el-button size="small" @click="handleShowAddClick" icon="el-icon-plus">添加</el-button>
       </el-form-item>
-      <el-form-item label="——">
-        <el-input v-model="queryform.name" size="small" placeholder="输入名称"></el-input>
+
+      <el-form-item label>
+        <el-select size="small" v-model="queryform.parentId" placeholder="请选择">
+          <el-option
+            v-for="item in rootResource"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
+        </el-select>
       </el-form-item>
-      <el-form-item>
-        <el-button size="small" icon="el-icon-search" @click="onSearch">查询</el-button>
+      <el-form-item label>
+        <el-input
+          size="small"
+          placeholder="请输入资源名称"
+          v-model="queryform.name"
+          class="input-with-select"
+        />
+      </el-form-item>
+      <el-form-item label>
+        <el-button size="small" @click="onSearch" icon="el-icon-search">查询</el-button>
       </el-form-item>
     </el-form>
 
@@ -42,6 +58,9 @@
       </el-table-column>
       <el-table-column label="图标" width="110" align="center">
         <template slot-scope="scope">{{scope.row.icon}}</template>
+      </el-table-column>
+      <el-table-column label="排序" width="50" align="center">
+        <template slot-scope="scope">{{scope.row.sort}}</template>
       </el-table-column>
       <el-table-column class-name="status-col" label="启用" width="110" align="center">
         <template slot-scope="scope">
@@ -85,16 +104,21 @@
         </el-form-item>
         <el-form-item label="上级菜单" :label-width="formLabelWidth">
           <el-select v-model="form.parentId" auto-complete="off">
-            <el-option label="请选择" value=""></el-option>
-            <el-option v-for="item in rootResource" :key="item.id" :label="item.name" :value="item.id"></el-option>
-          </el-select> 
+            <el-option label="请选择" value></el-option>
+            <el-option
+              v-for="item in rootResource"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="类型" :label-width="formLabelWidth">
           <el-select v-model="form.type" placeholder="请选择类型">
-            <el-option label="应用"  value="APP"></el-option>
-            <el-option label="分组"  value="GROUP"></el-option>
-            <el-option label="模块"  value="MODULE"></el-option>
-            <el-option label="操作"  value="BUTTON"></el-option>
+            <el-option label="应用" value="APP"></el-option>
+            <el-option label="分组" value="GROUP"></el-option>
+            <el-option label="模块" value="MODULE"></el-option>
+            <el-option label="操作" value="BUTTON"></el-option>
           </el-select>
         </el-form-item>
 
@@ -105,8 +129,12 @@
         <el-form-item label="图标" :label-width="formLabelWidth">
           <el-input v-model="form.icon" auto-complete="off"></el-input>
         </el-form-item>
+
+        <el-form-item label="排序" :label-width="formLabelWidth">
+          <el-input v-model="form.sort" auto-complete="off"></el-input>
+        </el-form-item>
         <el-form-item label="启用" :label-width="formLabelWidth">
-          <el-switch v-model="form.enable" active-value="1" inactive-value="0" /> 
+          <el-switch v-model="formEnable"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -118,15 +146,13 @@
 </template>
 
 
-
-
 <script>
 import {
   listResource,
   addResource,
   updateResource,
   deleteResource,
-  getResourceMenu
+  getResourceMenu,
 } from "@/api/apis";
 
 export default {
@@ -147,6 +173,7 @@ export default {
       dialogFormVisible: false,
       dialogFormTitle: "编辑",
       formLabelWidth: "120px",
+      formEnable: false,
       form: {
         // "id":"1",
         // "remark":"首页",
@@ -166,30 +193,35 @@ export default {
       rows: [],
       listLoading: true,
       queryform: {
+        parentId: "",
         name: "",
-        status: "",
       },
-      rootResource:[]
+      rootResource: [],
     };
   },
   created() {
     this.handleCurrentChange(1);
-    getResourceMenu({menuType:'ALL'}).then((response)=>{
-        const {data} = response
-        for(let i in data){
-          this.rootResource.push({
-            id:data[i].id,
-            name:data[i].title
-          })
-        }
-    })
-    
+    getResourceMenu({ menuType: "ALL" }).then((response) => {
+      const { data } = response;
+      for (let i in data) {
+        this.rootResource.push({
+          id: data[i].id,
+          name: data[i].title,
+        });
+      }
+    });
   },
   methods: {
     handleCurrentChange(p) {
       console.log(`当前页: ${p}`);
       this.listLoading = true;
-      listResource({ page: p, size: this.size }).then((response) => {
+
+      listResource({
+        page: p,
+        size: this.size,
+        parentId: this.queryform.parentId,
+        name: this.queryform.name,
+      }).then((response) => {
         this.rows = response.data.rows;
         this.page = p;
         this.total = response.data.total;
@@ -205,8 +237,8 @@ export default {
       this.handleCurrentChange(this.page);
     },
     handleShowEditClick(row) {
-      console.log(row);
       this.form = row;
+      this.formEnable = row.enable == 1?true:false
       this.dialogFormVisible = !this.dialogFormVisible;
     },
     handleShowAddClick() {
@@ -237,6 +269,7 @@ export default {
       });
     },
     handleEditSubmit() {
+      this.form.enable = this.formEnable?1:0
       if (this.form.id == null) {
         addResource(this.form).then(() => {
           this.dialogFormVisible = false;

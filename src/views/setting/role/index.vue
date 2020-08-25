@@ -73,14 +73,15 @@
           <el-input  type="textarea"  v-model="form.remark" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="资源" :label-width="formLabelWidth">
-
-          <div v-for="rootItem in rootResource" :key="rootItem.id" >
-            <el-checkbox-group v-model="checkedCities" @change="handleCheckedCitiesChange">  
-              <el-checkbox :checked="rootItem.checked"  @change="handleCheckAllChange">{{rootItem.name}}</el-checkbox>
-              <el-checkbox v-for="item in rootItem.children" :label="item.name" :checked="item.checked" :key="item.id">{{item.name}}</el-checkbox>
-            </el-checkbox-group>
-          </div>
-        
+                <el-tree
+                  :data="rootResource"
+                  show-checkbox
+                  node-key="id"
+                  ref="tree"
+                  :highlight-current="true"
+                  :default-expand-all="true"
+                  :props="defaultProps">
+                </el-tree>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -94,8 +95,7 @@
 </template>
 
 <script>
-import { listRole,addRole,updateRole,deleteRole,getResourceMenu } from "@/api/apis";
-import { getKeys } from '@/utils/auth'
+import { listRole,addRole,updateRole,deleteRole,getResourceListByRoleId } from "@/api/apis"; 
 export default {
   filters: {
     statusFilter(status) {
@@ -130,40 +130,15 @@ export default {
       },
       isIndeterminate:true,
       checkedCities:[],
-      rootResource:[]
+      rootResource:[],
+       defaultProps: {
+          children: 'children',
+          label: 'name'
+        }
     };
   },
   created() {
-    this.handleCurrentChange(1);
-      let keys = getKeys()
-      getResourceMenu({menuType:'ALL'}).then((response)=>{
-        const {data} = response
-        for(let i in data){
-          let key = data[i].key;
-          let item = { 
-            id:data[i].id, 
-            name:data[i].title,
-            checked:keys.indexOf(key)!=-1,
-            children: [] 
-          }
-          let itemChildren = data[i].children
-          if(itemChildren == null || itemChildren == undefined){
-            itemChildren = []
-          }
-          for(let j in itemChildren){
-              item.children.push({
-                 id:itemChildren[j].id, 
-                 name:itemChildren[j].title,
-                 checked:keys.indexOf(itemChildren[j].key)!=-1,
-                 children:[] 
-                 })
-          }
-          this.rootResource.push(item)
-        }
-        console.log("=============")
-        console.log(this.rootResource)
-        console.log("=============")
-    })
+    this.handleCurrentChange(1); 
   },
   methods: {
     handleCurrentChange(p) {
@@ -185,11 +160,30 @@ export default {
       this.handleCurrentChange(this.page);
     },
     handleEditClick(row) {
-      this.form = row;
-
-      let resourceList = this.form.resourceList 
-
+      this.form = row; 
       this.dialogFormVisible = !this.dialogFormVisible;
+
+      getResourceListByRoleId(row.id)
+      .then((resp)=>{
+        const { data } = resp;
+        this.rootResource = data;
+        let arr = new Array()
+        for(let i in data){
+          if(data[i].selected == 1){
+            arr.push(data[i].id)
+          }
+          if(data[i].children != null){
+             for(let j in data.children){
+                if(data.children[i].selected == 1){
+                   arr.push(data.children[i].id)
+                }
+             }
+          }
+        }
+
+        this.$refs.tree.setCheckedKeys(arr)
+        
+      })
     },
     handleShowAddClick(){
       this.dialogFormVisible = true;
@@ -213,6 +207,12 @@ export default {
       // this.dialogFormVisible = !this.dialogFormVisible;
     },
     handleEditSubmit() { 
+
+      let arr = this.$refs.tree.getCheckedKeys() 
+
+      for(let i in arr){
+        this.form.resourceList.push({id:arr[i]})
+      }  
       if(this.form.id == null ){
         addRole(this.form).then(()=>{
             this.dialogFormVisible = false
