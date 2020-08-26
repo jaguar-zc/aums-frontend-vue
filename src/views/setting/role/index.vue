@@ -64,8 +64,6 @@
       :close-on-click-modal="false"
       :close-on-press-escape="false"
     >
-      <div slot="header" class="dialog-header">
-      </div>
       <el-form :model="form">
         <el-tabs v-model="tabsActiveName" @tab-click="handleClick">
           <el-tab-pane label="角色信息" name="first">
@@ -102,11 +100,6 @@
     </el-dialog>
   </div>
 </template>
-<style scoped>
-.dialog-header {
-    padding: 0px; 
-  }
-</style>
 <script>
 import {
   listRole,

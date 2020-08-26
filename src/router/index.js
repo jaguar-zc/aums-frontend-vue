@@ -9,7 +9,7 @@ import Layout from '@/layout'
 /**
  * 发
  */
-export const hidenRoutes = [
+const hidenRoutes = [
   {
     path: '/login',
     component: () => import('@/views/login/index'),
@@ -50,22 +50,20 @@ const suffixRouter = [
   { path: '*', redirect: '/404', hidden: true }
 ]
 
-let list = getUserMenuList();
-// console.log(list)
-// console.log(defaultMenuList)
-let mergeRouters = hidenRoutes.concat(list, suffixRouter) 
 
 
-
-const createRouter = () => new Router({
+const createRouter = () => {
+  let list = getUserMenuList();
+  let mergeRouters = hidenRoutes.concat(list, suffixRouter) 
+  return new Router({
   // mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: mergeRouters
-})
+  })
+}
 
 const router = createRouter()
 
-// Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher // reset router

@@ -70,6 +70,7 @@
       </el-table-column>
       <el-table-column align="center" fixed="right" prop="created_at" label="操作" width="200">
         <template slot-scope="scope"> 
+          <el-button @click="handleResetPwdClick(scope.row)" type="text" size="small">重置密码</el-button>
           <el-button @click="handleEditClick(scope.row)" type="text" size="small">编辑</el-button>
           <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
         </template>
@@ -118,7 +119,7 @@
         <el-form-item label="角色" :label-width="formLabelWidth">
           <el-select v-model="form.roleList" multiple  auto-complete="off">
             <el-option
-              v-for="item in deptList"
+              v-for="item in roleList"
               :key="item.id"
               :label="item.name"
               :value="item.id"
@@ -136,6 +137,19 @@
     </el-dialog>
 
 
+
+    <el-dialog title="重置密码" width="30%" :visible.sync="dialogResetPwdVisible" :close-on-click-modal="false" :close-on-press-escape="false">
+      <el-form :model="form">
+        <el-form-item label="密码" :label-width="formLabelWidth">
+          <el-input  type="password" v-model="form.password" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleResetPwdSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -143,7 +157,7 @@
 
 
 <script>
-import { listUser,getUserById,addUser,updateUser,deleteUser,updateUserPwd,listDept } from "@/api/apis";
+import { listUser,getUserById,addUser,updateUser,deleteUser,updateUserPwd,listDept,listRole } from "@/api/apis";
 import { defaultSize,defaultPageSizes  } from "@/settings";
 
 export default {
@@ -160,20 +174,10 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
+      dialogResetPwdVisible: false,
       dialogFormTitle:"用户编辑",
       formLabelWidth:"80px",
-      form: {
-        // "id":"5",
-        // "username":"admin5",
-        // "password":null,
-        // "name":"管理员5",
-        // "phone":"18981063284",
-        // "icon":"http://47.110.10.117:9000/oss/851827a0-58f9-4258-a9a8-d8e423f791b0.jpg",
-        // "deptId":"1",
-        // "deptName":"研发部",
-        // "enable":1,
-        // "roleList":[]
-      },
+      form: {  },
       page: 1,
       size: defaultSize,
       total: 0,
@@ -191,6 +195,11 @@ export default {
     listDept().then((resp)=>{
       this.deptList = resp.data.rows
     })
+    listRole().then((resp)=>{
+      this.roleList = resp.data.rows
+    })
+
+    
     this.handleCurrentChange(1);
   },
   methods: {
@@ -229,6 +238,15 @@ export default {
     handleEditClick(row) {
       this.form = row;
       this.dialogFormVisible = !this.dialogFormVisible;
+    },
+    handleResetPwdClick(row){
+      this.form = row;
+      this.dialogResetPwdVisible = !this.dialogResetPwdVisible;
+    },
+    handleResetPwdSubmit(){
+      updateUserPwd({userId:this.form.id,newPassword:this.form.password}).then((resp)=>{
+         this.$message({ type: "success", message: "修改成功!" });
+      })
     },
     handleDeleteClick(row) {
        this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'  }).then(() => {
