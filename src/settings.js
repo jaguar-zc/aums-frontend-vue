@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: 'Ants Admin OS',
+  siteName: 'Nix Systems',
 
   /**
    * @type {boolean} true | false
@@ -12,5 +12,15 @@ module.exports = {
    * @type {boolean} true | false
    * @description Whether show the logo in sidebar
    */
-  sidebarLogo: false
+  sidebarLogo: true,
+
+  /**
+   * 表格每页默认加载多少条
+   */
+  defaultSize: 10,
+
+  /**
+   * 表格页大小设置
+   */
+  defaultPageSizes: [5,10,15,20]
 }

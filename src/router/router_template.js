@@ -27,54 +27,54 @@ export const defaultMenuList = [
     children: [
       {
         path: 'user',
-        name: 'SYS_USER',
+        name: 'SYS_USER', 
         component: () => import('@/views/setting/user/index'),
-        meta: { title: '用户管理', icon: 'table', affix: true  }
+        meta: { title: '用户管理', icon: 'el-icon-user', affix: true  }
       },
       {
         path: 'role',
-        name: 'SYS_ROLE',
+        name: 'SYS_ROLE', 
         component: () => import('@/views/setting/role/index'),
-        meta: { title: '角色管理', icon: 'tree', affix: true  }
+        meta: { title: '角色管理', icon: 'el-icon-view', affix: true  }
       },
       {
         path: 'dept',
-        name: 'SYS_DEPT',
+        name: 'SYS_DEPT', 
         component: () => import('@/views/setting/dept/index'),
-        meta: { title: '部门管理', icon: 'tree', affix: true  }
+        meta: { title: '部门管理', icon: 'el-icon-orange', affix: true  }
       },
       {
-        path: 'dict',
+        path: 'dict', 
         name: 'SYS_DICT',
         component: () => import('@/views/setting/dict/index'),
-        meta: { title: '字典管理', icon: 'tree' , affix: true }
+        meta: { title: '字典管理', icon: 'el-icon-notebook-2' , affix: true }
       },
       {
         path: 'resource',
-        name: 'SYS_RESOURCE',
+        name: 'SYS_RESOURCE', 
         component: () => import('@/views/setting/resource/index'),
-        meta: { title: '资源管理', icon: 'tree', affix: true  }
+        meta: { title: '资源管理', icon: 'el-icon-coin', affix: true  }
       } 
     ]
-  },
+  }, 
   {
     path: '/ops',
     component: Layout,
     redirect: '/ops/logs',
     name: 'OPS',
-    meta: { title: '运维工具', icon: 'el-icon-setting', affix: true },
+    meta: { title: '运维工具', icon: 'el-icon-cloudy-and-sunny', affix: true },
     children: [
       {
         path: 'logs',
-        name: 'OPS_LOGS',
+        name: 'OPS_LOGS', 
         component: () => import('@/views/ops/logs/index'),
-        meta: { title: '日志管理', icon: 'tree' , affix: true }
+        meta: { title: '日志管理', icon: 'el-icon-eleme' , affix: true }
       },
       {
         path: 'monitor',
         name: 'OPS_MONITOR',
-        component: () => import('@/views/ops/logs/index'),
-        meta: { title: 'JVM监控', icon: 'tree' , affix: true }
+        component: () => import('@/views/ops/monitor/index'),
+        meta: { title: 'JVM监控', icon: 'el-icon-cpu' , affix: true }
       }
     ]
   }

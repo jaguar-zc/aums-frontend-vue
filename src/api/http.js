@@ -34,9 +34,8 @@ async function request(options) {
         type: 'error',
         duration: 5 * 1000
       }) 
-    return '';
-  }
-  throw res;
+      throw res;
+  } 
 }
 
 export function get(url, data, config) {

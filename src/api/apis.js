@@ -27,6 +27,12 @@ export function updateUserPwd( data) {
 export function updateUserPhone( data) {
   return put('/system/user/updatePhone',data)
 } 
+export function updateUser( data) {
+  return put('/system/user',data)
+} 
+export function deleteUser( id) {
+  return del('/system/user/'+id)
+}
 
 //角色接口
 export function listRole( data) {
@@ -99,4 +105,10 @@ export function deleteDict( id) {
 //日志接口 GET /api/v1/system/logs
 export function listLogs(data) {
   return get('/system/logs',data)
+}
+
+
+//监控 GET /api/v1/system/jvm/monitor
+export function jvmMonitor() {
+  return get('/system/jvm/monitor',{})
 }

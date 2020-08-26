@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="queryform" class="demo-form-inline">
+    <el-form :inline="true" :model="queryform" ref="queryForm" class="demo-form-inline">
       <el-form-item label>
         <el-button size="small" @click="handleShowAddClick" icon="el-icon-plus">添加</el-button>
       </el-form-item>
 
-      <el-form-item label>
+      <el-form-item prop="parentId" label>
         <el-select size="small" v-model="queryform.parentId" placeholder="请选择">
           <el-option
             v-for="item in rootResource"
@@ -15,16 +15,18 @@
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label>
+      <el-form-item prop="name" label>
         <el-input
           size="small"
           placeholder="请输入资源名称"
+          style="width:500px;" 
           v-model="queryform.name"
           class="input-with-select"
         />
       </el-form-item>
       <el-form-item label>
         <el-button size="small" @click="onSearch" icon="el-icon-search">查询</el-button>
+         <el-button size="small" @click="$refs.queryForm.resetFields()" icon="el-icon-refresh">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -64,8 +66,8 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="启用" width="110" align="center">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.enable == 1 " type="success">是</el-tag>
-          <el-tag v-if="scope.row.enable == 0 " type="warning">否</el-tag>
+          <el-tag v-if="scope.row.enable == 1 " type="success">启用</el-tag>
+          <el-tag v-if="scope.row.enable == 0 " type="warning">停用</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="描述" align="left">
@@ -88,13 +90,13 @@
         total-text="总条数"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :page-sizes="[5, 10, 15, 20]"
+        :page-sizes="pageSizes"
         :page-size="size"
         :total="total"
       ></el-pagination>
     </div>
 
-    <el-dialog :title="dialogFormTitle" width="30%" :visible.sync="dialogFormVisible">
+    <el-dialog :title="dialogFormTitle" width="30%" :visible.sync="dialogFormVisible"  :close-on-click-modal="false" :close-on-press-escape="false">
       <el-form :model="form">
         <el-form-item label="名称" :label-width="formLabelWidth">
           <el-input v-model="form.name" auto-complete="off"></el-input>
@@ -154,7 +156,7 @@ import {
   deleteResource,
   getResourceMenu,
 } from "@/api/apis";
-
+import { defaultSize,defaultPageSizes  } from "@/settings";
 export default {
   filters: {
     moduleType(status) {
@@ -172,7 +174,7 @@ export default {
     return {
       dialogFormVisible: false,
       dialogFormTitle: "编辑",
-      formLabelWidth: "120px",
+      formLabelWidth: "80px",
       formEnable: false,
       form: {
         // "id":"1",
@@ -188,8 +190,9 @@ export default {
         // "childList":null,
       },
       page: 1,
-      size: 10,
-      total: 10,
+      size: defaultSize,
+      pageSizes: defaultPageSizes,
+      total: 0,
       rows: [],
       listLoading: true,
       queryform: {

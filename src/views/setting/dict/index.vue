@@ -1,14 +1,15 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="queryform" class="demo-form-inline">
+    <el-form :inline="true" :model="queryform" ref="queryForm" class="demo-form-inline">
       <el-form-item label>
         <el-button size="small" @click="handleShowAddClick" icon="el-icon-plus">添加</el-button>
       </el-form-item>
-      <el-form-item label="——">
-        <el-input v-model="queryform.name" size="small" placeholder="输入名称"></el-input>
+      <el-form-item prop="name" label>
+        <el-input v-model="queryform.name" size="small" style="width:500px;"  placeholder="输入名称"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button size="small" icon="el-icon-search" @click="onSearch">查询</el-button>
+        <el-button size="small" icon="el-icon-search" @click="onSearch">查询</el-button> 
+         <el-button size="small" @click="$refs.queryForm.resetFields()" icon="el-icon-refresh">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -49,13 +50,13 @@
         total-text="总条数"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :page-sizes="[5, 10, 15, 20]"
+        :page-sizes="pageSizes"
         :page-size="size"
         :total="total"
       ></el-pagination>
     </div>
 
-    <el-dialog :title="dialogFormTitle" :visible.sync="dialogFormVisible">
+    <el-dialog :title="dialogFormTitle" width="30%" :visible.sync="dialogFormVisible"  :close-on-click-modal="false" :close-on-press-escape="false">
       <el-form :model="form">
         <el-form-item label="编码" :label-width="formLabelWidth">
           <el-input v-model="form.dataCode" auto-complete="off" v-if="IS_ADD == true" ></el-input>
@@ -81,6 +82,7 @@
 
 <script>
 import { listDict, addDict, updateDict, deleteDict } from "@/api/apis";
+import { defaultSize,defaultPageSizes  } from "@/settings";
 
 export default {
   filters: {
@@ -97,11 +99,12 @@ export default {
     return {
       dialogFormVisible: false,
       dialogFormTitle: "编辑",
-      formLabelWidth: "120px",
+      formLabelWidth: "80px",
       form: {   },
       page: 1,
-      size: 5,
-      total: 10,
+      size: defaultSize,
+      pageSizes: defaultPageSizes, 
+      total: 0,
       rows: [],
       listLoading: true,
       IS_ADD: true,
@@ -118,7 +121,7 @@ export default {
     handleCurrentChange(p) {
       console.log(`当前页: ${p}`);
       this.listLoading = true;
-      listDict({ page: p, size: this.size }).then((response) => {
+      listDict({ page: p, size: this.size,name:this.queryform.name }).then((response) => {
         this.rows = response.data.rows;
         this.page = p;
         this.total = response.data.total;

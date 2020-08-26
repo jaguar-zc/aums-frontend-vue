@@ -6,7 +6,7 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || 'Ants Admin OS' // page title
+const name = defaultSettings.siteName || 'Vue Admin Template' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.

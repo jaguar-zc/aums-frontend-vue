@@ -1,18 +1,29 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="queryform" class="demo-form-inline">
-      <el-form-item label="用户名">
-        <el-input v-model="queryform.name" placeholder="用户名/姓名/手机号"></el-input>
+   <el-form :inline="true" :model="queryform" ref="queryForm" class="demo-form-inline">
+      <el-form-item label>
+        <el-button size="small" @click="handleShowAddClick" icon="el-icon-plus">添加</el-button>
       </el-form-item>
-      <el-form-item label="状态">
-        <el-select v-model="queryform.status" placeholder="状态">
-          <el-option label="请选择" value></el-option>
+
+      <el-form-item  prop="parentId"  label>
+        <el-select size="small" v-model="queryform.parentId" placeholder="请选择状态">
+        <el-option label="请选择" value></el-option>
           <el-option label="启用" value="0"></el-option>
           <el-option label="停用" value="1"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSearch">查询</el-button>
+      <el-form-item  prop="name" label>
+        <el-input
+          size="small"
+          placeholder="用户名/姓名/手机号"
+          style="width:500px;" 
+          v-model="queryform.name"
+          class="input-with-select"
+        />
+      </el-form-item>
+      <el-form-item label>
+        <el-button size="small" @click="onSearch" icon="el-icon-search">查询</el-button>
+        <el-button size="small" @click="$refs.queryForm.resetFields()" icon="el-icon-refresh">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -28,7 +39,6 @@
       <el-table-column align="center" label="ID" width="35">
         <template slot-scope="scope">
         {{ ((page-1) * size) + (scope.$index + 1) }}
-          <!-- {{ scope.row.id }} -->
         </template>
       </el-table-column>
       <el-table-column label="账号"  width="110">
@@ -52,14 +62,15 @@
  
       <el-table-column class-name="status-col" label="启用" width="110" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.enable | statusFilter">{{ scope.row.enable }}</el-tag>
+          <el-tag v-if="scope.row.enable == 1" type="success">启用</el-tag>
+          <el-tag v-if="scope.row.enable == 0" type="info">停用</el-tag> 
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" align="center">
       </el-table-column>
       <el-table-column align="center" fixed="right" prop="created_at" label="操作" width="200">
-        <template slot-scope="scope">
-          <el-button @click="handleEditClick(scope.row)" type="text" size="small">查看</el-button>
+        <template slot-scope="scope"> 
+          <el-button @click="handleEditClick(scope.row)" type="text" size="small">编辑</el-button>
           <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -73,32 +84,49 @@
         total-text="总条数"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :page-sizes="[5, 10, 15, 20]"
+        :page-sizes="pageSizes"
         :page-size="size"
         :total="total"
       ></el-pagination>
     </div>
 
-    <el-dialog :title="dialogFormTitle" :visible.sync="dialogFormVisible">
+    <el-dialog :title="dialogFormTitle" width="30%" :visible.sync="dialogFormVisible" :close-on-click-modal="false" :close-on-press-escape="false">
       <el-form :model="form">
         <el-form-item label="账号" :label-width="formLabelWidth">
-          <el-input disabled v-model="form.username" auto-complete="off"></el-input>
+          <el-input  v-model="form.username" auto-complete="off"></el-input>
         </el-form-item>
-     
+        <el-form-item label="密码" :label-width="formLabelWidth">
+          <el-input  v-model="form.password" auto-complete="off"></el-input>
+        </el-form-item>
         <el-form-item label="用户名称" :label-width="formLabelWidth">
-          <el-input disabled v-model="form.name" auto-complete="off"></el-input>
+          <el-input  v-model="form.name" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="手机号" :label-width="formLabelWidth">
-          <el-input disabled v-model="form.phone" auto-complete="off"></el-input>
+          <el-input  v-model="form.phone" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="部门" :label-width="formLabelWidth">
-          <el-input disabled v-model="form.deptName" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="状态" :label-width="formLabelWidth">
-          <el-select disabled v-model="form.enable" placeholder="请选择状态">
-            <el-option label="启用" value="1"></el-option>
-            <el-option label="停用" value="0"></el-option>
+          <el-select v-model="form.deptId" auto-complete="off">
+            <el-option label="请选择" value></el-option>
+            <el-option
+              v-for="item in deptList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="角色" :label-width="formLabelWidth">
+          <el-select v-model="form.roleList" multiple  auto-complete="off">
+            <el-option
+              v-for="item in deptList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="启用" :label-width="formLabelWidth">
+            <el-switch v-model="form.enable"  :active-value="1" :inactive-value="0"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -106,6 +134,8 @@
         <el-button type="primary" @click="handleEditSubmit">确 定</el-button>
       </div>
     </el-dialog>
+
+
   </div>
 </template>
 
@@ -113,7 +143,8 @@
 
 
 <script>
-import { listUser,getUserById,addUser,updateUserPwd } from "@/api/apis";
+import { listUser,getUserById,addUser,updateUser,deleteUser,updateUserPwd,listDept } from "@/api/apis";
+import { defaultSize,defaultPageSizes  } from "@/settings";
 
 export default {
   filters: {
@@ -130,7 +161,7 @@ export default {
     return {
       dialogFormVisible: false,
       dialogFormTitle:"用户编辑",
-      formLabelWidth:"120px",
+      formLabelWidth:"80px",
       form: {
         // "id":"5",
         // "username":"admin5",
@@ -144,9 +175,11 @@ export default {
         // "roleList":[]
       },
       page: 1,
-      size: 5,
-      total: 10,
+      size: defaultSize,
+      total: 0,
+      pageSizes: defaultPageSizes,
       rows: [],
+      deptList:[],
       listLoading: true,
       queryform: {
         name: "",
@@ -155,6 +188,9 @@ export default {
     };
   },
   created() {
+    listDept().then((resp)=>{
+      this.deptList = resp.data.rows
+    })
     this.handleCurrentChange(1);
   },
   methods: {
@@ -176,27 +212,54 @@ export default {
     onSearch() {
       this.handleCurrentChange(this.page);
     },
+    handleShowAddClick(){
+      this.form = {
+        "username":"",
+        "password":null,
+        "name":"",
+        "phone":"",
+        "icon":"https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif?imageView2/1/w/80/h/80",
+        "deptId":"",
+        "deptName":"",
+        "enable":1,
+        "roleList":[]
+        };
+      this.dialogFormVisible = !this.dialogFormVisible;
+    }, 
     handleEditClick(row) {
       this.form = row;
       this.dialogFormVisible = !this.dialogFormVisible;
     },
     handleDeleteClick(row) {
-       this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
+       this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'  }).then(() => {
+          deleteUser(row.id).then(() => {
+            this.$message({ type: "success", message: "删除成功!" });
+            this.onSearch();
           });
-        }) ;
-      // this.form = row;
-      // this.dialogFormVisible = !this.dialogFormVisible;
+        }) ; 
     },
     handleEditSubmit() { 
-      this.dialogFormVisible = false
-      this.$message({
-            type: 'success',
-            message: '保存成功!'
-          });
+       if(this.form.id == null ){
+          addUser(this.form).then((resp)=>{
+              this.$message({
+                type: 'success',
+                message: '添加成功!'
+              });
+              this.dialogFormVisible = false
+              this.onSearch();
+          })
+       }else{
+          updateUser(this.form).then((resp)=>{
+              this.$message({
+                type: 'success',
+                message: '修改成功!'
+              });
+              this.dialogFormVisible = false
+              this.onSearch();
+              
+          })
+
+       }
     },
   },
 };

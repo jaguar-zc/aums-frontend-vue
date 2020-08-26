@@ -1,14 +1,15 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="queryform" class="demo-form-inline">
+    <el-form :inline="true" :model="queryform" ref="queryForm" class="demo-form-inline">
       <el-form-item label="">
          <el-button  size="small"  @click="handleShowAddClick"  icon="el-icon-plus">添加</el-button>
       </el-form-item>
-      <el-form-item label="——">
-        <el-input v-model="queryform.name" size="small" placeholder="输入名称"></el-input>
+      <el-form-item prop="name" label>
+        <el-input v-model="queryform.name" size="small" style="width:500px;"  placeholder="输入名称"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button size="small" icon="el-icon-search" @click="onSearch">查询</el-button> 
+         <el-button size="small" @click="$refs.queryForm.resetFields()" icon="el-icon-refresh">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -54,13 +55,13 @@
         total-text="总条数"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :page-sizes="[5, 10, 15, 20]"
+        :page-sizes="pageSizes"
         :page-size="size"
         :total="total"
       ></el-pagination>
     </div>
 
-     <el-dialog :title="dialogFormTitle" width="25%" :visible.sync="dialogFormVisible">
+     <el-dialog :title="dialogFormTitle" width="25%" :visible.sync="dialogFormVisible"  :close-on-click-modal="false" :close-on-press-escape="false">
       <el-form :model="form">
         <el-form-item label="部门名称" :label-width="formLabelWidth">
           <el-input  v-model="form.name" auto-complete="off"></el-input>
@@ -82,7 +83,7 @@
 
 <script>
 import { listDept,addDept,updateDept,deleteDept } from "@/api/apis";
-
+import { defaultSize,defaultPageSizes  } from "@/settings";
 export default {
   filters: {
     statusFilter(status) {
@@ -98,7 +99,7 @@ export default {
     return {
       dialogFormVisible: false,
       dialogFormTitle: "部门编辑",
-      formLabelWidth: "120px",
+      formLabelWidth: "80px",
       form: {
       // "id":"5",
       // "name":"UED部门",
@@ -107,8 +108,9 @@ export default {
       // "createUser":"admin"
       },
       page: 1,
-      size: 10,
-      total: 10,
+      size: defaultSize,
+      pageSizes: defaultPageSizes,      
+      total: 0,
       rows: [],
       listLoading: true,
       queryform: {
