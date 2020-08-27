@@ -89,17 +89,41 @@ export function getResourceListByRoleId( id) {
 } 
 
 //资源接口 GET /api/v1/system/dict
-export function listDict( data) {
-  return get('/system/dict',data)
+export function listDictType(data) {
+  return get('/system/dict/type_list',data)
 }
-export function addDict( data) {
-  return post('/system/dict',data)
+export function listDictValue( data) {
+  return get('/system/dict/value_list',data)
 }
-export function updateDict( data) {
-  return put('/system/dict',data)
+export function addDictType( data) {
+  return post('/system/dict/type',data)
 }
-export function deleteDict( id) {
-  return del('/system/dict/'+id)
+export function addDictValue( data) {
+  return post('/system/dict/value',data)
+}  
+export function updateDictType( data) {
+  return put('/system/dict/type',data)
+}
+export function deleteDictType( id) {
+  return del('/system/dict/type/'+id)
+} 
+export function deleteDictValue( id) {
+  return del('/system/dict/value/'+id)
+} 
+
+
+//资源接口 GET /api/v1/system/dict
+export function listApp( data) {
+  return get('/system/app',data)
+}
+export function addApp( data) {
+  return post('/system/app',data)
+}
+export function updateApp( data) {
+  return put('/system/app',data)
+}
+export function deleteApp( id) {
+  return del('/system/app/'+id)
 } 
 
 //日志接口 GET /api/v1/system/logs

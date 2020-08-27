@@ -26,6 +26,12 @@ export const defaultMenuList = [
     meta: { title: '系统设置', icon: 'el-icon-setting', affix: true  },
     children: [
       {
+        path: 'app',
+        name: 'SYS_APP', 
+        component: () => import('@/views/setting/app/index'),
+        meta: { title: '应用管理', icon: 'el-icon-goods', affix: true  }
+      },
+      {
         path: 'user',
         name: 'SYS_USER', 
         component: () => import('@/views/setting/user/index'),
@@ -53,7 +59,7 @@ export const defaultMenuList = [
         path: 'resource',
         name: 'SYS_RESOURCE', 
         component: () => import('@/views/setting/resource/index'),
-        meta: { title: '资源管理', icon: 'el-icon-coin', affix: true  }
+        meta: { title: '资源管理', icon: 'el-icon-menu', affix: true  }
       } 
     ]
   }, 

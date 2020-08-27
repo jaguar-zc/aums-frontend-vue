@@ -1,79 +1,156 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="queryform" ref="queryForm" class="demo-form-inline">
-      <el-form-item label>
-        <el-button size="small" @click="handleShowAddClick" icon="el-icon-plus">添加</el-button>
-      </el-form-item>
-      <el-form-item prop="name" label>
-        <el-input v-model="queryform.name" size="small" style="width:500px;"  placeholder="输入名称"></el-input>
-      </el-form-item>
-      <el-form-item>
-        <el-button size="small" icon="el-icon-search" @click="onSearch">查询</el-button> 
-         <el-button size="small" @click="$refs.queryForm.resetFields()" icon="el-icon-refresh">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-row>
+      <el-col :span="10">
+        <div>
+          <el-form :inline="true" class="demo-form-inline">
+            <el-form-item label>
+              <el-button size="small" @click="handleShowAddClick" icon="el-icon-plus">添加字典类型</el-button>
+            </el-form-item>
+          </el-form>
 
-    <el-table
-      v-loading="listLoading"
-      :data="rows"
-      size="mini"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
+          <el-table
+            v-loading="listLoading"
+            :data="rows"
+            size="mini"
+             height="400"
+            element-loading-text="Loading" 
+            border
+            fit
+            highlight-current-row
+          >
+            <el-table-column align="center" label="ID" width="35">
+              <template slot-scope="scope">{{ ((page-1) * size) + (scope.$index + 1) }}</template>
+            </el-table-column>
+            <el-table-column label="应用">
+              <template slot-scope="scope">{{ scope.row.appId | appFilter }}</template>
+            </el-table-column>
+            <el-table-column label="类型名称">
+              <template slot-scope="scope">{{ scope.row.name }}</template>
+            </el-table-column>
+            <el-table-column label="描述" align="left">
+              <template slot-scope="scope">{{ scope.row.desc }}</template>
+            </el-table-column>
+            <el-table-column align="center" prop="created_at" label="操作">
+              <template slot-scope="scope">
+                <el-button @click="handleSelectClick(scope.row.id)" type="text" size="small">查看</el-button>
+                <el-button @click="handleShowValueAddClick(scope.row)" type="text" size="small">添加</el-button> 
+                <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div style="display: flex; flex-direction: row-reverse; padding: 15px;">
+            <el-pagination
+              background
+              layout=" prev, pager, next"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :page-sizes="pageSizes"
+              :page-size="size"
+              :total="total"
+            ></el-pagination>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="13" :offset="1">
+        <div>
+          <el-form :inline="true" class="demo-form-inline">
+            <el-form-item label>
+              <!-- <el-button size="small" @click="handleShowValueAddClick" icon="el-icon-plus">添加字典值</el-button> -->
+            </el-form-item>
+          </el-form>
+
+          <el-table
+            v-loading="listRightLoading"
+            :data="rightRows"
+            height="400"
+            size="mini"
+            element-loading-text="Loading"
+            border
+            fit
+            highlight-current-row
+          >
+            <el-table-column align="center" label="ID" width="35">
+              <template slot-scope="scope">{{ ((page-1) * size) + (scope.$index + 1) }}</template>
+            </el-table-column>
+            <el-table-column label="编码" align="left">
+              <template slot-scope="scope">{{ scope.row.dataCode }}</template>
+            </el-table-column>
+            <el-table-column label="名称">
+              <template slot-scope="scope">{{ scope.row.dataValue }}</template>
+            </el-table-column>
+
+            <el-table-column align="center" prop="created_at" label="操作">
+              <template slot-scope="scope">
+                <el-button @click="handleRgihtDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-col>
+    </el-row>
+
+    <el-dialog
+      :title="dialogFormTitle"
+      width="30%"
+      :visible.sync="dialogTypeFormVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
     >
-      <el-table-column align="center" label="ID" width="35">
-        <template slot-scope="scope">{{ ((page-1) * size) + (scope.$index + 1) }}</template>
-      </el-table-column>
-      <el-table-column label="编码" width="200">
-        <template slot-scope="scope">{{ scope.row.dataCode }}</template>
-      </el-table-column>
-      <el-table-column label="值" width="250">
-        <template slot-scope="scope">{{ scope.row.dataValue }}</template>
-      </el-table-column>
-      <el-table-column label="描述" align="left">
-        <template slot-scope="scope">{{ scope.row.dataDesc }}</template>
-      </el-table-column>
-      <el-table-column align="center" prop="created_at" label="操作" width="200">
-        <template slot-scope="scope">
-          <el-button @click="handleShowEditClick(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <div style="display: flex; flex-direction: row-reverse; padding: 15px;">
-      <el-pagination
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        prev-text="上一页"
-        next-text="下一页"
-        total-text="总条数"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :page-sizes="pageSizes"
-        :page-size="size"
-        :total="total"
-      ></el-pagination>
-    </div>
-
-    <el-dialog :title="dialogFormTitle" width="30%" :visible.sync="dialogFormVisible"  :close-on-click-modal="false" :close-on-press-escape="false">
       <el-form :model="form">
-        <el-form-item label="编码" :label-width="formLabelWidth">
-          <el-input v-model="form.dataCode" auto-complete="off" v-if="IS_ADD == true" ></el-input>
-          <el-input v-model="form.dataCode" auto-complete="off" v-if="IS_ADD == false" disabled></el-input>
+        <el-form-item label="应用" :label-width="formLabelWidth">
+          <el-select size="small" v-model="form.appId" placeholder="请选择">
+            <el-option
+              v-for="item in listApp"
+              :key="item.appId"
+              :label="item.name"
+              :value="item.appId"
+            ></el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="值" :label-width="formLabelWidth">
-          <el-input v-model="form.dataValue" auto-complete="off"></el-input>
+        <el-form-item label="名称" :label-width="formLabelWidth">
+          <el-input v-model="form.name" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="描述" :label-width="formLabelWidth">
-          <el-input type="textarea" v-model="form.dataDesc" auto-complete="off"></el-input>
+          <el-input type="textarea" v-model="form.desc" auto-complete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button> 
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="handleEditSubmit">确 定</el-button>
       </div>
     </el-dialog>
+
+
+
+
+   <el-dialog
+      title="添加字典值"
+      width="30%"
+      :visible.sync="dialogValueFormVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <el-form :model="valueForm">
+        <el-form-item label="字典类型" :label-width="formLabelWidth">
+           <el-input disabled v-model="valueForm.dictTypeName" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="编码" :label-width="formLabelWidth">
+          <el-input v-model="valueForm.dataCode" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="名称" :label-width="formLabelWidth">
+          <el-input v-model="valueForm.dataValue" auto-complete="off"></el-input>
+        </el-form-item>
+      
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogValueFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleValuesSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
+
+
+
   </div>
 </template>
 
@@ -81,47 +158,67 @@
 
 
 <script>
-import { listDict, addDict, updateDict, deleteDict } from "@/api/apis";
-import { defaultSize,defaultPageSizes  } from "@/settings";
-
+import {
+  listDictType,
+  listDictValue,
+  addDictType,
+  addDictValue,
+  updateDictType,
+  deleteDictType,
+  deleteDictValue,
+  listApp,
+} from "@/api/apis";
+import { defaultSize, defaultPageSizes } from "@/settings";
+var app0;
 export default {
   filters: {
-    statusFilter(status) {
-      const statusMap = {
-        1: "success",
-        0: "gray",
-        deleted: "danger",
-      };
-      return statusMap[status];
+    appFilter(id) {
+      for (let i in app0.listApp) {
+        if (id === app0.listApp[i].appId) {
+          return app0.listApp[i].name;
+        }
+      }
+      return id;
     },
   },
   data() {
     return {
-      dialogFormVisible: false,
+      dialogTypeFormVisible: false,
+      dialogValueFormVisible: false,
       dialogFormTitle: "编辑",
       formLabelWidth: "80px",
-      form: {   },
+      form: {},
+      valueForm: {},
       page: 1,
       size: defaultSize,
-      pageSizes: defaultPageSizes, 
+      pageSizes: defaultPageSizes,
       total: 0,
       rows: [],
+      rightRows: [],
       listLoading: true,
+      listRightLoading: false,
       IS_ADD: true,
       queryform: {
         name: "",
         status: "",
       },
+      listApp: [],
     };
   },
   created() {
     this.handleCurrentChange(1);
   },
+  beforeCreate: function () {
+    app0 = this;
+  },
   methods: {
     handleCurrentChange(p) {
       console.log(`当前页: ${p}`);
       this.listLoading = true;
-      listDict({ page: p, size: this.size,name:this.queryform.name }).then((response) => {
+      listApp({ page: 1, size: 100 }).then((resp) => {
+        this.listApp = resp.data.rows;
+      });
+      listDictType({ page: p, size: this.size }).then((response) => {
         this.rows = response.data.rows;
         this.page = p;
         this.total = response.data.total;
@@ -139,40 +236,76 @@ export default {
     handleShowEditClick(row) {
       this.form = row;
       this.IS_ADD = false;
-      this.dialogFormVisible = !this.dialogFormVisible;
+      this.dialogTypeFormVisible = !this.dialogTypeFormVisible;
     },
-    handleShowAddClick(){
-      this.dialogFormVisible = true;
+    handleShowAddClick() {
+      this.dialogTypeFormVisible = true;
       this.IS_ADD = true;
       this.form = {
-        "dataCode":null,
-        "dataValue":"", 
-        "dataDesc":""
-      }
+        appId: null,
+        name: "",
+        desc: "",
+      };
+    },
+    handleShowValueAddClick(row){
+      this.dialogValueFormVisible = true; 
+      this.valueForm = {
+        dictTypeId: row.id,
+        dictTypeName:row.name,
+        dataCode: "",
+        dataValue: "",
+      };
     },
     handleDeleteClick(row) {
-       this.$confirm('此操作将永久删除, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'})
-       .then(() => {
-          deleteDict(row.dataCode).then(()=>{
-            this.$message({ type: 'success', message: '删除成功!' });
-            this.onSearch()
-          })
-        })
+      this.$confirm("此操作将永久删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        deleteDictType(row.dataCode).then(() => {
+          this.$message({ type: "success", message: "删除成功!" });
+          this.onSearch();
+        });
+      });
     },
-    handleEditSubmit() {  
-      console.log(this.IS_ADD)
-      if(this.IS_ADD == true){
-        addDict(this.form).then(()=>{
-            this.dialogFormVisible = false
-            this.$message({ type: 'success', message: '保存成功!'  });
-            this.onSearch()
-        })
-      }else{
-        updateDict(this.form).then(()=>{
-            this.dialogFormVisible = false
-            this.$message({ type: 'success', message: '保存成功!'  });
-        })
+    handleRgihtDeleteClick(row) {
+      this.$confirm("此操作将永久删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        deleteDictValue(row.id).then(() => {
+          this.$message({ type: "success", message: "删除成功!" });
+          this.handleSelectClick(row.dictTypeId)
+        });
+      });
+    },
+    handleEditSubmit() {
+      console.log(this.IS_ADD);
+      if (this.IS_ADD == true) {
+        addDictType(this.form).then(() => {
+          this.dialogTypeFormVisible = false;
+          this.$message({ type: "success", message: "保存成功!" });
+          this.onSearch();
+        });
+      } else {
+        updateDictType(this.form).then(() => {
+          this.dialogTypeFormVisible = false;
+          this.$message({ type: "success", message: "保存成功!" });
+        });
       }
+    },
+    handleSelectClick(id) {
+      listDictValue({ page: 1, size: 500, dictTypeId:id }).then((resp)=>{
+        this.rightRows = resp.data.rows;
+      }) 
+    },
+    handleValuesSubmit() {
+      addDictValue(this.valueForm).then(() => {
+        this.dialogValueFormVisible = false;
+        this.$message({ type: "success", message: "保存成功!" });
+        this.handleSelectClick(this.valueForm.dictTypeId)
+      });
     }
   },
 };

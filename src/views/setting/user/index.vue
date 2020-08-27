@@ -96,8 +96,8 @@
         <el-form-item label="账号" :label-width="formLabelWidth">
           <el-input  v-model="form.username" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="密码" :label-width="formLabelWidth">
-          <el-input  v-model="form.password" auto-complete="off"></el-input>
+        <el-form-item v-if="this.form.id == null" label="密码" :label-width="formLabelWidth">
+          <el-input  type="password" v-model="form.password" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="用户名称" :label-width="formLabelWidth">
           <el-input  v-model="form.name" auto-complete="off"></el-input>
@@ -145,7 +145,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="dialogResetPwdVisible = false">取 消</el-button>
         <el-button type="primary" @click="handleResetPwdSubmit">确 定</el-button>
       </div>
     </el-dialog>
@@ -175,7 +175,7 @@ export default {
     return {
       dialogFormVisible: false,
       dialogResetPwdVisible: false,
-      dialogFormTitle:"用户编辑",
+      dialogFormTitle:"用户",
       formLabelWidth:"80px",
       form: {  },
       page: 1,
@@ -274,9 +274,7 @@ export default {
               });
               this.dialogFormVisible = false
               this.onSearch();
-              
           })
-
        }
     },
   },
