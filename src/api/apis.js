@@ -68,6 +68,10 @@ export function listDeptMembers(id) {
 
 //资源接口 GET /api/v1/system/resource
 
+
+export function listResourceLazy( data) {
+  return get('/system/resource/lazy',data)
+}
 export function listResource( data) {
   return get('/system/resource',data)
 }

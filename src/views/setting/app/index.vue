@@ -44,8 +44,8 @@
       </el-table-column>
       <el-table-column align="center" prop="created_at" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.appId != 1" @click="handleShowEditClick(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button v-if="scope.row.appId != 1" @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+          <el-button v-if="scope.row.appId != 1" @click="handleShowEditClick(scope.row)" type="text"  >编辑</el-button>
+          <el-button v-if="scope.row.appId != 1" @click="handleDeleteClick(scope.row)" type="text" style="color:red;" >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -66,8 +66,8 @@
 
      <el-dialog :title="dialogFormTitle" width="25%" :visible.sync="dialogFormVisible"  :close-on-click-modal="false" :close-on-press-escape="false">
       <el-form :model="form">
-        <el-form-item label="应用ID" :label-width="formLabelWidth">
-          <el-input disabled  v-model="form.appId" auto-complete="off"></el-input>
+        <el-form-item v-if="isAdd" label="应用ID" :label-width="formLabelWidth">
+          <el-input  v-model="form.appId" auto-complete="off"></el-input>
         </el-form-item>
 
         <el-form-item label="名称" :label-width="formLabelWidth">
@@ -100,6 +100,7 @@ export default {
       dialogFormVisible: false,
       dialogFormTitle: "编辑",
       formLabelWidth: "80px",
+      isAdd:false,
       form: {
       // "id":"5",
       // "name":"UED部门",
@@ -142,11 +143,13 @@ export default {
       this.handleCurrentChange(this.page);
     },
     handleShowEditClick(row) {
+      this.isAdd = false;
       console.log(row);
       this.form = row;
       this.dialogFormVisible = !this.dialogFormVisible;
     },
     handleShowAddClick(){
+      this.isAdd = true;
       this.dialogFormVisible = true;
       this.form = {
         "id":null,
@@ -157,14 +160,14 @@ export default {
     handleDeleteClick(row) {
        this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'})
        .then(() => {
-          deleteApp(row.id).then(()=>{
+          deleteApp(row.appId).then(()=>{
             this.$message({ type: 'success', message: '删除成功!' });
             this.onSearch()
           })
         })
     },
     handleEditSubmit() { 
-      if(this.form.id == null ){
+      if(this.isAdd){
         addApp(this.form).then(()=>{
             this.dialogFormVisible = false
             this.$message({

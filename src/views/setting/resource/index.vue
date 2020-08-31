@@ -5,13 +5,13 @@
         <el-button size="small" @click="handleShowAddClick" icon="el-icon-plus">添加</el-button>
       </el-form-item>
 
-      <el-form-item prop="parentId" label>
-        <el-select size="small" v-model="queryform.parentId" placeholder="请选择">
+      <el-form-item prop="appId" label="应用名称">
+        <el-select size="small" v-model="queryform.appId" placeholder="请选择">
           <el-option
-            v-for="item in rootResource"
-            :key="item.id"
+            v-for="item in listApp"
+            :key="item.appId"
             :label="item.name"
-            :value="item.id"
+            :value="item.appId"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -19,14 +19,14 @@
         <el-input
           size="small"
           placeholder="请输入资源名称"
-          style="width:500px;" 
+          style="width:500px;"
           v-model="queryform.name"
           class="input-with-select"
         />
       </el-form-item>
       <el-form-item label>
         <el-button size="small" @click="onSearch" icon="el-icon-search">查询</el-button>
-         <el-button size="small" @click="$refs.queryForm.resetFields()" icon="el-icon-refresh">重置</el-button>
+        <el-button size="small" @click="$refs.queryForm.resetFields()" icon="el-icon-refresh">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -39,8 +39,48 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="35">
-        <template slot-scope="scope">{{ ((page-1) * size) + (scope.$index + 1) }}</template>
+      <el-table-column type="expand"  label>
+        <template slot-scope="prop" >
+          <el-table
+            :data="prop.row.childList"
+            size="mini"
+            border
+            fit
+            highlight-current-row
+            :show-header="false"
+            style="width: 100%;padding:0px"
+          >
+            <el-table-column prop="name" label="名称" width="110"></el-table-column>
+            <el-table-column prop="code" label="编码" width="110"></el-table-column> 
+            <el-table-column prop="resourceLevel" label="级别" width="50" align="center"></el-table-column>
+            <el-table-column label="类型" width="110" align="center">
+              <template slot-scope="props">{{ props.row.type | moduleType }}</template>
+            </el-table-column>
+            <el-table-column label="地址" width="110" align="center">
+              <template slot-scope="props">{{ props.row.uri }}</template>
+            </el-table-column>
+            <el-table-column label="图标" width="110" align="center">
+              <template slot-scope="props">{{props.row.icon}}</template>
+            </el-table-column>
+            <el-table-column prop="sort" label="排序" align="center" width="50"></el-table-column>
+            <el-table-column class-name="status-col" label="启用" width="80" align="center">
+              <template slot-scope="props">
+                <el-tag v-if="props.row.enable == 1 "  size="small" type="success">启用</el-tag>
+                <el-tag v-if="props.row.enable == 0 "  size="small" type="warning">停用</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="描述" align="left">
+              <template slot-scope="props">{{ props.row.remark }}</template>
+            </el-table-column>
+
+            <el-table-column align="center" prop="created_at" label="操作" width="200">
+              <template slot-scope="props">
+                <el-button @click="handleShowEditClick(props.row)" type="text" >编辑</el-button>
+                <el-button @click="handleDeleteClick(props.row)" type="text" style="color:red;" >删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
       </el-table-column>
       <el-table-column label="名称" width="110">
         <template slot-scope="scope">{{ scope.row.name }}</template>
@@ -48,10 +88,9 @@
       <el-table-column label="编码" width="110">
         <template slot-scope="scope">{{ scope.row.code }}</template>
       </el-table-column>
-      <el-table-column label="上级菜单" width="110">
-        <template slot-scope="scope">{{ scope.row.parentName }}</template>
+      <el-table-column label="级别" width="50" align="center">
+        <template slot-scope="scope">{{ scope.row.resourceLevel }}</template>
       </el-table-column>
-
       <el-table-column label="类型" width="110" align="center">
         <template slot-scope="scope">{{ scope.row.type | moduleType }}</template>
       </el-table-column>
@@ -64,10 +103,10 @@
       <el-table-column label="排序" width="50" align="center">
         <template slot-scope="scope">{{scope.row.sort}}</template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="启用" width="110" align="center">
+      <el-table-column class-name="status-col" label="启用" width="80" align="center">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.enable == 1 " type="success">启用</el-tag>
-          <el-tag v-if="scope.row.enable == 0 " type="warning">停用</el-tag>
+          <el-tag v-if="scope.row.enable == 1 "  size="small" type="success">启用</el-tag>
+          <el-tag v-if="scope.row.enable == 0 "  size="small" type="warning">停用</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="描述" align="left">
@@ -76,8 +115,8 @@
 
       <el-table-column align="center" prop="created_at" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button @click="handleShowEditClick(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+          <el-button @click="handleShowEditClick(scope.row)" type="text" >编辑</el-button>
+          <el-button @click="handleDeleteClick(scope.row)" type="text" style="color:red;"  >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -96,34 +135,42 @@
       ></el-pagination>
     </div>
 
-    <el-dialog :title="dialogFormTitle" width="30%" :visible.sync="dialogFormVisible"  :close-on-click-modal="false" :close-on-press-escape="false">
+    <el-dialog
+      :title="dialogFormTitle"
+      width="30%"
+      :visible.sync="dialogFormVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
       <el-form :model="form">
-        <el-form-item label="名称" :label-width="formLabelWidth">
-          <el-input v-model="form.name" auto-complete="off"></el-input>
+       <el-form-item label="资源类型" :label-width="formLabelWidth">
+           <el-radio-group v-model="form.type">
+            <el-radio disabled label="APP">应用</el-radio>
+            <el-radio  label="GROUP">分组</el-radio>
+            <el-radio  label="MODULE">模块</el-radio>
+            <el-radio  label="BUTTON">操作</el-radio>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="编码" :label-width="formLabelWidth">
-          <el-input v-model="form.code" auto-complete="off"></el-input>
-        </el-form-item>
+
         <el-form-item label="上级菜单" :label-width="formLabelWidth">
           <el-select v-model="form.parentId" auto-complete="off">
             <el-option label="请选择" value></el-option>
             <el-option
-              v-for="item in rootResource"
+              v-for="item in rows"
               :key="item.id"
               :label="item.name"
               :value="item.id"
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="类型" :label-width="formLabelWidth">
-          <el-select v-model="form.type" placeholder="请选择类型">
-            <el-option label="应用" value="APP"></el-option>
-            <el-option label="分组" value="GROUP"></el-option>
-            <el-option label="模块" value="MODULE"></el-option>
-            <el-option label="操作" value="BUTTON"></el-option>
-          </el-select>
-        </el-form-item>
 
+        <el-form-item label="名称" :label-width="formLabelWidth">
+          <el-input v-model="form.name" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="编码" :label-width="formLabelWidth">
+          <el-input v-model="form.code" auto-complete="off"></el-input>
+        </el-form-item>
+      
         <el-form-item label="地址" :label-width="formLabelWidth">
           <el-input v-model="form.uri" auto-complete="off"></el-input>
         </el-form-item>
@@ -133,10 +180,10 @@
         </el-form-item>
 
         <el-form-item label="排序" :label-width="formLabelWidth">
-          <el-input v-model="form.sort" auto-complete="off"></el-input>
+          <el-input-number v-model="form.sort"   :min="1" :max="100"></el-input-number>
         </el-form-item>
         <el-form-item label="启用" :label-width="formLabelWidth">
-          <el-switch v-model="formEnable"/>
+          <el-switch v-model="formEnable" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -148,15 +195,21 @@
 </template>
 
 
+<style>
+.el-table__expanded-cell[class*=cell] {
+    padding: 0px 0px 0px 47px;
+}
+</style>
+
 <script>
 import {
   listResource,
   addResource,
   updateResource,
   deleteResource,
-  getResourceMenu,
+  listApp,
 } from "@/api/apis";
-import { defaultSize,defaultPageSizes  } from "@/settings";
+import { defaultSize, defaultPageSizes } from "@/settings";
 export default {
   filters: {
     moduleType(status) {
@@ -173,7 +226,7 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
-      dialogFormTitle: "编辑",
+      dialogFormTitle: "资源",
       formLabelWidth: "80px",
       formEnable: false,
       form: {
@@ -196,22 +249,17 @@ export default {
       rows: [],
       listLoading: true,
       queryform: {
-        parentId: "",
+        appId: "",
         name: "",
-      },
-      rootResource: [],
+      }, 
+      listApp: [],
     };
   },
   created() {
-    this.handleCurrentChange(1);
-    getResourceMenu({ menuType: "ALL" }).then((response) => {
-      const { data } = response;
-      for (let i in data) {
-        this.rootResource.push({
-          id: data[i].id,
-          name: data[i].title,
-        });
-      }
+    listApp({ page: 1, size: 100 }).then((resp) => {
+      this.listApp = resp.data.rows;
+      this.queryform.appId = this.listApp[0].appId;
+      this.handleCurrentChange(1);
     });
   },
   methods: {
@@ -222,7 +270,7 @@ export default {
       listResource({
         page: p,
         size: this.size,
-        parentId: this.queryform.parentId,
+        appId: this.queryform.appId,
         name: this.queryform.name,
       }).then((response) => {
         this.rows = response.data.rows;
@@ -241,7 +289,7 @@ export default {
     },
     handleShowEditClick(row) {
       this.form = row;
-      this.formEnable = row.enable == 1?true:false
+      this.formEnable = row.enable == 1 ? true : false;
       this.dialogFormVisible = !this.dialogFormVisible;
     },
     handleShowAddClick() {
@@ -272,7 +320,8 @@ export default {
       });
     },
     handleEditSubmit() {
-      this.form.enable = this.formEnable?1:0
+      this.form.enable = this.formEnable ? 1 : 0;
+      this.form.appId = this.queryform.appId
       if (this.form.id == null) {
         addResource(this.form).then(() => {
           this.dialogFormVisible = false;

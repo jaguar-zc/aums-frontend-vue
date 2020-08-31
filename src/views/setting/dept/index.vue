@@ -41,8 +41,8 @@
       </el-table-column>
       <el-table-column align="center" prop="created_at" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button @click="handleShowEditClick(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+          <el-button @click="handleShowEditClick(scope.row)" type="text"  >编辑</el-button>
+          <el-button @click="handleDeleteClick(scope.row)" type="text" style="color:red;" >删除</el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -33,7 +33,7 @@
             </el-table-column>
             <el-table-column align="center" prop="created_at" label="操作">
               <template slot-scope="scope">
-                <el-button @click="handleSelectClick(scope.row.id)" type="text" size="small">查看</el-button>
+                <el-button @click="handleSelectClick(scope.row)" type="text" size="small">查看</el-button>
                 <el-button @click="handleShowValueAddClick(scope.row)" type="text" size="small">添加</el-button> 
                 <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
               </template>
@@ -56,7 +56,7 @@
         <div>
           <el-form :inline="true" class="demo-form-inline">
             <el-form-item label>
-              <!-- <el-button size="small" @click="handleShowValueAddClick" icon="el-icon-plus">添加字典值</el-button> -->
+              <el-button size="small" @click="handleShowValueAddClick" icon="el-icon-plus">{{selectedTypeName+" - "}}添加字典值</el-button>
             </el-form-item>
           </el-form>
 
@@ -82,7 +82,7 @@
 
             <el-table-column align="center" prop="created_at" label="操作">
               <template slot-scope="scope">
-                <el-button @click="handleRgihtDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+                <el-button @click="handleRgihtDeleteClick(scope.row)" type="text" style="color:red;" >删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -203,6 +203,7 @@ export default {
         status: "",
       },
       listApp: [],
+      selectedTypeName:''
     };
   },
   created() {
@@ -218,11 +219,16 @@ export default {
       listApp({ page: 1, size: 100 }).then((resp) => {
         this.listApp = resp.data.rows;
       });
+      let self = this
       listDictType({ page: p, size: this.size }).then((response) => {
-        this.rows = response.data.rows;
-        this.page = p;
-        this.total = response.data.total;
-        this.listLoading = false;
+        self.rows = response.data.rows;
+        self.page = p;
+        self.total = response.data.total;
+        self.listLoading = false;
+        if(self.rows.length >0){
+          self.selectedTypeName = self.rows[0].name
+          self.handleSelectClick(self.rows[0])
+        }
       });
     },
     handleSizeChange(val) {
@@ -295,8 +301,9 @@ export default {
         });
       }
     },
-    handleSelectClick(id) {
-      listDictValue({ page: 1, size: 500, dictTypeId:id }).then((resp)=>{
+    handleSelectClick(row) {
+      this.selectedTypeName = row.name
+      listDictValue({ page: 1, size: 500, dictTypeId:row.id }).then((resp)=>{
         this.rightRows = resp.data.rows;
       }) 
     },

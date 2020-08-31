@@ -96,7 +96,7 @@
 
       <el-table-column align="center" prop="created_at" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button @click="handleShowEditClick(scope.row)" type="text" size="small">查看</el-button>
+          <el-button @click="handleShowEditClick(scope.row)" type="text"  >查看</el-button>
           <!-- <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button> -->
         </template>
       </el-table-column>
@@ -172,7 +172,7 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
-      dialogFormTitle: "编辑",
+      dialogFormTitle: "查看",
       formLabelWidth: "80px",
       form: {},
       page: 1,

@@ -58,7 +58,7 @@ export const defaultMenuList = [
       {
         path: 'resource',
         name: 'SYS_RESOURCE', 
-        component: () => import('@/views/setting/resource/index'),
+        component: () => import('@/views/setting/resource/newIndex'),
         meta: { title: '资源管理', icon: 'el-icon-menu', affix: true  }
       } 
     ]

@@ -37,8 +37,8 @@
       </el-table-column>
       <el-table-column align="center" prop="created_at" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button @click="handleEditClick(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+          <el-button @click="handleEditClick(scope.row)" type="text">编辑</el-button>
+          <el-button @click="handleDeleteClick(scope.row)" type="text" style="color:red;">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -64,8 +64,8 @@
       :close-on-click-modal="false"
       :close-on-press-escape="false"
     >
-      <el-form :model="form">
-        <el-tabs v-model="tabsActiveName" @tab-click="handleClick">
+      <el-form :model="form" style="overflow-y: scroll;  max-height: 450px;">
+        <el-tabs v-model="tabsActiveName"  >
           <el-tab-pane label="角色信息" name="first">
             <el-form-item label="角色名称" :label-width="formLabelWidth">
               <el-input v-model="form.name" auto-complete="off"></el-input>
@@ -83,9 +83,8 @@
                 :data="rootResource"
                 show-checkbox
                 node-key="id"
-                ref="tree"
-                :highlight-current="true"
-                :default-expand-all="true"
+                ref="treeRole"
+                :highlight-current="true" 
                 :props="defaultProps"
               ></el-tree>
             </el-form-item>
@@ -110,23 +109,13 @@ import {
 } from "@/api/apis";
 import { defaultSize, defaultPageSizes } from "@/settings";
 
-export default {
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        1: "success",
-        0: "gray",
-        deleted: "danger",
-      };
-      return statusMap[status];
-    },
-  },
+export default { 
   data() {
     return {
       dialogFormVisible: false,
       dialogFormTitle: "角色编辑",
       formLabelWidth: "80px",
-      tabsActiveName: 'first',
+      tabsActiveName: "first",
       form: {
         // "id":"3",
         // "name":"部门经理",
@@ -176,29 +165,38 @@ export default {
       this.handleCurrentChange(this.page);
     },
     handleEditClick(row) {
-      this.form = row;
-      this.dialogFormVisible = !this.dialogFormVisible;
+      this.form = row; 
+      this.dialogFormVisible = !this.dialogFormVisible; 
       getResourceListByRoleId(row.id).then((resp) => {
         const { data } = resp;
         this.rootResource = data;
         let arr = new Array();
         for (let i in data) {
-          if (data[i].selected == 1) {
-            arr.push(data[i].id);
+          let item1 = data[i];
+          if (item1.selected == 1) {
+            arr.push(item1.id);
           }
-          if (data[i].children != null) {
-            for (let j in data.children) {
-              if (data.children[i].selected == 1) {
-                arr.push(data.children[i].id);
+          if (item1.children != null) {
+            for (let j in item1.children) {
+              let item2 = item1.children[j];
+              if (item2.selected == 1) {
+                arr.push(item2.id);
+              }
+              if (item2.children != null) {
+                for (let y in item2.children) {
+                  let item3 = item2.children[y];
+                  if (item3.selected == 1) {
+                    arr.push(item3.id);
+                  }
+                }
               }
             }
           }
-        }
-        this.$refs.tree.setCheckedKeys(arr);
+        } 
+        this.$refs.treeRole.setCheckedKeys(arr);
       });
     },
     handleShowAddClick() {
-      this.dialogFormVisible = true;
       this.form = {
         id: null,
         name: "",
@@ -206,6 +204,35 @@ export default {
         remark: "",
         resourceList: [],
       };
+      this.dialogFormVisible = true; 
+      getResourceListByRoleId().then((resp) => {
+        const { data } = resp;
+        this.rootResource = data;
+        let arr = new Array();
+        for (let i in data) {
+          let item1 = data[i];
+          if (item1.selected == 1) {
+            arr.push(item1.id);
+          }
+          if (item1.children != null) {
+            for (let j in item1.children) {
+              let item2 = item1.children[j];
+              if (item2.selected == 1) {
+                arr.push(item2.id);
+              }
+              if (item2.children != null) {
+                for (let y in item2.children) {
+                  let item3 = item2.children[y];
+                  if (item3.selected == 1) {
+                    arr.push(item3.id);
+                  }
+                }
+              }
+            }
+          }
+        }  
+        this.$refs.treeRole.setCheckedKeys(arr);
+      });
     },
     handleDeleteClick(row) {
       this.$confirm("此操作将永久删除该角色, 是否继续?", "提示", {

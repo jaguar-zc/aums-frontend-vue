@@ -54,7 +54,7 @@
         <template slot-scope="scope">{{ scope.row.deptName }}</template>
       </el-table-column>
       
-      <el-table-column label="头像"  align="center">
+      <el-table-column label="头像" width="50" align="center">
         <template slot-scope="scope">
           <img :src="scope.row.icon " class="user-avatar" style="width:30px;" />
         </template>
@@ -70,9 +70,9 @@
       </el-table-column>
       <el-table-column align="center" fixed="right" prop="created_at" label="操作" width="200">
         <template slot-scope="scope"> 
-          <el-button @click="handleResetPwdClick(scope.row)" type="text" size="small">重置密码</el-button>
-          <el-button @click="handleEditClick(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button @click="handleDeleteClick(scope.row)" type="text" size="small">删除</el-button>
+          <el-button @click="handleResetPwdClick(scope.row)" type="text"  >重置密码</el-button>
+          <el-button @click="handleEditClick(scope.row)" type="text"  >编辑</el-button>
+          <el-button @click="handleDeleteClick(scope.row)" type="text" style="color:red;" >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
