@@ -2,7 +2,7 @@
 import Layout from '@/layout'
 
 import { getKeys } from '@/utils/auth'
-
+import { getResourceMenu } from '@/api/apis'
 
 export const defaultMenuList = [
   {

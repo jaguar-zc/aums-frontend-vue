@@ -247,7 +247,7 @@ export default {
       });
     },
     handleEditSubmit() {
-      let arr = this.$refs.tree.getCheckedKeys();
+      let arr = this.$refs.treeRole.getCheckedKeys();
       for (let i in arr) {
         this.form.resourceList.push({ id: arr[i] });
       }

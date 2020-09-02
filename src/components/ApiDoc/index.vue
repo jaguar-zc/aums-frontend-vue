@@ -9,7 +9,7 @@
 export default {
   data() {
     return {
-      src: 'http://aums.stackflow.cn/swagger-ui.html'
+      src: 'http://demo-api.stackflow.cn/swagger-ui.html'
     }
   },
   methods: {
